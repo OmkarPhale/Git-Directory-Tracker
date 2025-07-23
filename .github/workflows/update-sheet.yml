@@ -1,0 +1,24 @@
+name: Update Google Sheet
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-sheet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install gspread oauth2client
+      - name: Run script
+        env:
+          GOOGLE_SHEETS_JSON: ${{ secrets.GOOGLE_SHEETS_JSON }}
+        run: |
+          echo "$GOOGLE_SHEETS_JSON" > credentials.json
+          python scripts/update_google_sheet.py
