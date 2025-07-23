@@ -1,0 +1,32 @@
+name: Sync GitHub to Google Sheet
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *' # runs every hour
+
+jobs:
+  sync-sheet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install PyGithub gspread oauth2client
+
+      - name: Write Google Sheets credentials
+        run: echo "${{ secrets.GOOGLE_SHEETS_JSON }}" > credentials.json
+
+      - name: Run Python script
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: credentials.json
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GH_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: python scripts/update_google_sheet.py
